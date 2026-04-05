@@ -64,19 +64,22 @@ void loop() {
         Serial.print(":"); 
         Serial.println(RES_ACCEL_ZOUT);
       }
-      else if (serial_input =="READ_WHOAMI_BAD_ADDR"){
-        Result8 RES_WHO_AM_I = readRegister8(ADDR_MPU6050 + 1,REG_WHO_AM_I);
-        if (RES_WHO_AM_I.success){
-          Serial.print("OK:WHO_AM_I:");
-          Serial.println(RES_WHO_AM_I.value);
-        }
-        else{
-          Serial.println("ERR:MPU_NOT_DETECTED");
-        }
+      else{
+        Serial.println("ERR:FAILED_READ_ACCEL");
+      }
+    }
+    else if (serial_input =="READ_WHOAMI_BAD_ADDR"){
+      Result8 RES_WHO_AM_I = readRegister8(ADDR_MPU6050 + 1,REG_WHO_AM_I);
+      if (RES_WHO_AM_I.success){
+        Serial.print("OK:WHO_AM_I:");
+        Serial.println(RES_WHO_AM_I.value);
       }
       else{
-        Serial.println("ERROR:FAILED_READ_ACCEL");
+        Serial.println("ERR:MPU_NOT_DETECTED");
       }
+    }
+    else{
+      Serial.println("ERR:UNKNOWN_CMD");
     }
   }
 }

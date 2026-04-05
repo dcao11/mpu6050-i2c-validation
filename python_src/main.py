@@ -83,12 +83,19 @@ def send_command_csv(cmd: str) -> None:
         writer.writerow(final_format)
 
 
-send_command_csv("READ_WHOAMI")
-send_command_csv("READ_WHOAMI")
-send_command_csv("READ_WHOAMI")
+# send_variable = "READ_ACCEL"
+#
 
+send_command_csv("READ_WHOAMI")
 send_command_csv("READ_ACCEL")
-send_command_csv("READ_ACCEL")
-send_command_csv("READ_ACCEL")
-send_command_csv("READ_ACCEL")
+send_command_csv("READ_WHOAMI_BAD_ADDR")
+
+
+
+
+# for i in range(100):
+#     send_command_csv(send_variable)
+#     time.sleep(1)
+
+
 

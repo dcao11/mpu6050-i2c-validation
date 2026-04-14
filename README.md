@@ -26,5 +26,12 @@ ERR:I2C_FAIL
 ## CSV Format
 timestamp,result,command,status,test,x,y,z,raw
 
+### Example Logged Output (Python / CSV)
+['2026-04-04 17:39:40.805', 'PASS', 'READ_WHOAMI', 'OK', 'WHO_AM_I', '104', 'OK:WHO_AM_I:104']
+
+['2026-04-04 17:39:40.914', 'PASS', 'READ_ACCEL', 'OK', 'ACCEL', '-928', '-176', '15168', 'OK:ACCEL:-928:-176:15168']
+
+['2026-04-04 17:39:41.023', 'FAIL', 'READ_WHOAMI_BAD_ADDR', 'ERR', 'MPU_NOT_DETECTED', 'ERR:MPU_NOT_DETECTED']
+
 ## Notes
 Built to demonstrate validation engineering concepts: protocol design, automation, and fault injection.

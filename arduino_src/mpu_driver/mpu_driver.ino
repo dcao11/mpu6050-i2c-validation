@@ -78,12 +78,31 @@ void loop() {
         Serial.println("ERR:MPU_NOT_DETECTED");
       }
     }
+    else if (serial_input == "SET_I2C_100K") {
+    Wire.setClock(100000);
+    Serial.println("OK:CLK=100kHz");
+    }
+    else if (serial_input == "SET_I2C_200K") {
+    Wire.setClock(200000);
+    Serial.println("OK:CLK=200kHz");
+    }
+    else if (serial_input == "SET_I2C_300K") {
+    Wire.setClock(300000);
+    Serial.println("OK:CLK=300kHz");
+    }
+    else if (serial_input == "SET_I2C_400K") {
+    Wire.setClock(400000);
+    Serial.println("OK:CLK=400kHz");
+    }
+    else if (serial_input == "SET_I2C_1000K") {
+    Wire.setClock(1000000);
+    Serial.println("OK:CLK=1000kHz");
+    }
     else{
       Serial.println("ERR:UNKNOWN_CMD");
     }
   }
 }
-
 
 
 
@@ -164,53 +183,5 @@ void writeRegister(uint8_t device_addr, uint8_t reg, uint8_t val) {
 }
 
 
-
-
-// old
-/*
-uint8_t readRegister8(uint8_t device_addr, uint8_t reg) {
-  Wire.beginTransmission(device_addr);
-  Wire.write(reg);
-  if (Wire.endTransmission(false) != 0){  // Repeated Start
-    return 0;
-  }
-  if (Wire.requestFrom(device_addr, 1)!= 1){
-    return 0xFF;
-  }
-  return Wire.read();
-}
-
-
-
-// read a 16 bit register from a specific address
-int16_t readRegister16(uint8_t device_addr, uint8_t reg){
-  Wire.beginTransmission(device_addr);
-  Wire.write(reg);
-  if (Wire.endTransmission(false) != 0){  // Repeated Start
-    return 0;
-  }
-  if (Wire.requestFrom(device_addr, 2) != 2){
-    return 0xFFFF;
-  } 
-  uint8_t MSB = Wire.read();
-  uint8_t LSB = Wire.read();
-  return (int16_t) ((MSB <<8) | LSB);
-}
-
-
-
-// reading multiple register at once to reduce overhead 
-void readBurst(uint8_t device_addr, uint8_t reg, uint8_t* buffer, uint8_t length) {
-  Wire.beginTransmission(device_addr);
-  Wire.write(reg);
-  if (Wire.endTransmission(false) != 0) return;
-  if (Wire.requestFrom(device_addr, length) != length) return;
-  for (uint8_t i = 0; i < length; i++) {
-    buffer[i] = Wire.read();
-  }
-}
-
-
-*/
 
 

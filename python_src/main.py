@@ -1,34 +1,50 @@
-from logger import send_command_csv
-from analyzer import analyze_i2c
 from serial_comm import serial_setup, send_command
-import os
+from analyzer import evaluate_result, analyze_i2c
 
 
+def run_test(ser, cmd):
+    print(f"\n[TEST] {cmd}")
 
-# print(__file__)
-# print(os.path.dirname(__file__))
-# BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-# DATA_DIR = os.path.join(BASE_DIR, "data")
-# print(BASE_DIR)
-# print(DATA_DIR)
+    response = send_command(ser, cmd)
+    print(f"Response: {response}")
 
+    result = evaluate_result(response.split(":"))
+    print(f"Result: {result}")
 
-# serial_setup("COM3",9600)
-# print(send_command("SET_I2C_100K"))
-# send_command_csv("READ_WHOAMI")
-# send_command_csv("READ_ACCEL")
-# send_command_csv("READ_WHOAMI_BAD_ADDR")
-# print(send_command("SET_I2C_400K"))
-# send_command_csv("READ_WHOAMI")
-# send_command_csv("READ_ACCEL")
-# send_command_csv("READ_WHOAMI_BAD_ADDR")
+    return result
 
 
-# for i in range(100):
-#     send_command_csv("READ_ACCEL")
+def run_i2c_analysis():
+    print("\nRunning I2C Timing Analysis...\n")
 
-# analyze_i2c('i2c_data_100khz.csv')
-# analyze_i2c('i2c_data_400khz.csv')
+    print("[100 kHz Test]")
+    analyze_i2c('data/i2c_data_100khz.csv')
+
+    print("\n[400 kHz Test]")
+    analyze_i2c('data/i2c_data_400khz.csv')
 
 
+def main():
+    ser = serial_setup("COM3", 9600)
+
+    commands = [
+        "READ_WHOAMI",
+        "READ_ACCEL",
+        "READ_WHOAMI_BAD_ADDR"
+    ]
+
+    results = [run_test(ser, cmd) for cmd in commands]
+
+    print("\n----------------------------------")
+    print(f"PASS: {results.count('PASS')}")
+    print(f"FAIL: {results.count('FAIL')}")
+    print("----------------------------------")
+
+    print("\n----------------------------------")
+
+    run_i2c_analysis()
+
+
+if __name__ == "__main__":
+    main()
 

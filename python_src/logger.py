@@ -1,8 +1,10 @@
-from datetime import datetime
+import time
 import csv
 import os
 from serial_comm import send_command
 from analyzer import evaluate_result
+from datetime import datetime
+
 
 def get_precise_time() -> str:
     # 1. Get the raw float timestamp

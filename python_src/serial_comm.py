@@ -2,7 +2,7 @@ import serial
 import time
 
 
-def serial_setup(port: int, baud: int):
+def serial_setup(port: str, baud: int):
     ser = serial.Serial(port, baud, timeout=1)
     time.sleep(2)  # Arduino reset delay
     return ser

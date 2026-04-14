@@ -1,5 +1,5 @@
 import pandas as pd
-
+import os
 
 def evaluate_result(response: list[str]) -> str:
     status, test = response[0:2]
@@ -19,7 +19,10 @@ def evaluate_result(response: list[str]) -> str:
 
 def analyze_i2c(file_path):
     # Load the CSV
-    df = pd.read_csv(file_path)
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+    full_path = os.path.join(BASE_DIR, file_path)
+
+    df = pd.read_csv(full_path)
 
     # 1. Detect Time Unit from the first column name
     time_header = df.columns[0].lower()

@@ -23,9 +23,43 @@ structured results for analysis.
 
 ## Architecture
 
-Python (Host) -\> Serial -\> Arduino (DUT) -\> I2C -\> MPU6050
-
+```text
+Python Host
+   │
+   │ Serial
+   ↓
+Arduino (DUT)
+   │
+   │ I2C
+   ↓
+MPU6050 Sensor
+```
 ------------------------------------------------------------------------
+
+## I2C Timing Validation
+
+The I2C bus was tested at multiple configured speeds using the MCU's I2C peripheral.
+
+| Configured Speed | Measured Average Frequency |
+|------------------|----------------------------|
+| 100 kHz          | ~100 kHz                   |
+| 400 kHz          | ~519 kHz                   |
+
+### Observations
+- Standard mode (100 kHz) operates within expected range
+- Fast mode (400 kHz) exceeds expected frequency
+- Measured clock deviates due to hardware clock configuration (BRR/MDDR settings)
+
+### Analysis
+The discrepancy at 400 kHz suggests:
+- Clock divisor rounding limitations in the MCU
+- Possible bitrate modulation effects
+- Peripheral configuration not achieving exact target frequency
+
+### Validation Outcome
+- System remains functional at measured frequency
+- Device (MPU6050) tolerates higher clock rate
+- Highlighted as a **timing deviation for further calibration**
 
 ## Project Structure
 
@@ -41,8 +75,13 @@ project_root/
 │
 ├── data/                # Generated CSV logs and pulse view csv files
 │
-├── arduino_src/             # Arduino firmware (DUT)
+├── arduino_src/         # Arduino firmware (DUT)
 │   └── mpu6050_validation.ino
+│
+├── assets/              # Screenshots
+│   ├── terminal_output.png
+│   ├── csv_output.png
+│   └── i2c_waveform.png
 │
 └── README.md
 ```
@@ -91,8 +130,27 @@ Example:
 ## Data Handling
 
 -   Logs saved in data/ directory
--   Paths resolved dynamically using **file**
+-   Paths resolved dynamically using __file__
 -   Directories auto-created if missing
+
+
+------------------------------------------------------------------------
+## Example Output
+
+### Terminal
+#### Results of "READ_WHOAMI", "READ_ACCEL", "READ_WHOAMI_BAD_ADDR" 
+![Terminal Output](assets/terminal_output.png)
+
+#### i2c frequency analyze, 100khz and 400khz respectively  
+![Terminal Output](assets/terminal_output_i2c_freq.png)
+
+### CSV Output
+#### test_READ_ACCEL.csv
+![CSV Output](assets/csv_output.png)
+
+### I2C Waveform (PulseView)
+#### Accelerometer burst read
+![I2C Waveform](assets/i2c_waveform.png)
 
 ------------------------------------------------------------------------
 

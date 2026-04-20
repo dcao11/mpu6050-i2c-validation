@@ -17,7 +17,6 @@ structured results for analysis.
 -   Automated PASS/FAIL evaluation logic
 -   Structured CSV logging
 -   Fault injection support (e.g. bad address, corrupted data)
--   Cross-platform file handling with dynamic path management
 
 ------------------------------------------------------------------------
 
@@ -35,7 +34,26 @@ Arduino (DUT)
 MPU6050 Sensor
 ```
 ------------------------------------------------------------------------
+## Components
 
+- Arduino Uno R4
+- MPU6050
+- Logic Analyzer (PulseView)
+- Jumper wires
+- 5kΩ Resistors
+
+------------------------------------------------------------------------
+
+## Hardware Setup
+
+- MPU6050 connected via I2C:
+  - VCC → 5V
+  - GND → GND
+  - SDA → SDA (Arduino)
+  - SCL → SCL (Arduino)
+
+- Pull-up resistors (~5kΩ) used on SDA and SCL
+------------------------------------------------------------------------
 ## I2C Timing Validation
 
 The I2C bus was tested at multiple configured speeds using the MCU's I2C peripheral.
@@ -108,14 +126,14 @@ Format: timestamp, result, command, status, test, x, y, z, raw
 
 Example: 
 
-\['2026-04-04 17:39:40.805', 'PASS', 'READ_WHOAMI', 'OK',
-'WHO_AM_I', '104', 'OK:WHO_AM_I:104'\]
+['2026-04-04 17:39:40.805', 'PASS', 'READ_WHOAMI', 'OK',
+'WHO_AM_I', '104', 'OK:WHO_AM_I:104']
 
-\['2026-04-04 17:39:40.914', 'PASS', 'READ_ACCEL', 'OK', 'ACCEL',
-'-928', '-176', '15168', 'OK:ACCEL:-928:-176:15168'\]
+['2026-04-04 17:39:40.914', 'PASS', 'READ_ACCEL', 'OK', 'ACCEL',
+'-928', '-176', '15168', 'OK:ACCEL:-928:-176:15168']
 
-\['2026-04-04 17:39:41.023', 'FAIL', 'READ_WHOAMI_BAD_ADDR', 'ERR',
-'MPU_NOT_DETECTED', 'ERR:MPU_NOT_DETECTED'\]
+['2026-04-04 17:39:41.023', 'FAIL', 'READ_WHOAMI_BAD_ADDR', 'ERR',
+'MPU_NOT_DETECTED', 'ERR:MPU_NOT_DETECTED']
 
 ------------------------------------------------------------------------
 
@@ -156,19 +174,17 @@ Example:
 
 ## Notes
 
-Demonstrates validation engineering concepts: 
-- Hardware/software
-integration 
-- Protocol design 
-- Automation and logging 
-- Fault injection 
-- Data analysis
+This project demonstrates practical validation engineering through real hardware testing:
+
+- Built a Python-based test framework for host-to-DUT communication
+- Validated I2C protocol behavior using register and burst reads
+- Implemented automated PASS/FAIL evaluation based on expected sensor output
+- Performed fault injection (invalid address) to verify error handling
+- Analyzed real signal timing using a logic analyzer (PulseView)
 
 ------------------------------------------------------------------------
 
 ## Future Improvements
 
--   Batch test runner
+-   Batch test runner to support regression testing 
 -   Summary report (PASS/FAIL stats)
--   I2C timing visualization
--   Mock serial testing

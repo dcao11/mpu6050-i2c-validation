@@ -17,6 +17,9 @@ obj/
 *.elf
 *.o
 
+# PulseView captures/sessions
+pulseview/
+
 # --- IDE Specific (Optional but recommended) ---
 .vscode/
 .idea/

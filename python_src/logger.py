@@ -16,13 +16,13 @@ def get_precise_time() -> str:
     return precise_date
 
 
-def send_command_csv(cmd: str) -> None:
+def send_command_csv(ser, cmd: str) -> None:
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
     DATA_DIR = os.path.join(BASE_DIR, "data")
     os.makedirs(DATA_DIR, exist_ok=True)
 
     precise_time: str = get_precise_time()
-    data: str = send_command(cmd)
+    data: str = send_command(ser, cmd)
 
     file_name = os.path.join(DATA_DIR, f"test_{cmd}.csv")
     file_exists = os.path.isfile(file_name)

@@ -11,7 +11,7 @@ const uint8_t REG_ACCEL_XOUT = 0x3B; //[15:8], 0x3C is [7:0] likewise for the ot
 const uint8_t REG_ACCEL_YOUT = 0x3D;
 const uint8_t REG_ACCEL_ZOUT = 0x3F;
 
-uint32_t current_i2c_hz = 400000;
+uint32_t current_i2c_hz = 100000;
 
 
 struct Result8 {

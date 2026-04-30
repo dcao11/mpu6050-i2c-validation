@@ -1,0 +1,23 @@
+# --- Python Specific ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Hardware & Data (The "Results") ---
+*.csv
+*.log
+
+# --- Arduino / C++ Build Artifacts ---
+build/
+bin/
+obj/
+*.hex
+*.elf
+*.o
+
+# --- IDE Specific (Optional but recommended) ---
+.vscode/
+.idea/
+.DS_Store

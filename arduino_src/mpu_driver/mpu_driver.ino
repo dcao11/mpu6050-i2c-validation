@@ -11,6 +11,8 @@ const uint8_t REG_ACCEL_XOUT = 0x3B; //[15:8], 0x3C is [7:0] likewise for the ot
 const uint8_t REG_ACCEL_YOUT = 0x3D;
 const uint8_t REG_ACCEL_ZOUT = 0x3F;
 
+uint32_t current_i2c_hz = 400000;
+
 
 struct Result8 {
     bool success;
@@ -27,17 +29,84 @@ struct BurstResult6 {
     uint8_t data[6];
 };
 
+void printI2CDiagnostics(uint32_t requested_hz) {
+  const uint32_t PCLKB_HZ = R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB);
+  const uint32_t SCI_CLOCK_HZ = R_FSP_SystemClockHzGet(BSP_FEATURE_SCI_CLOCK);
+  const uint32_t IICPHI_HZ = PCLKB_HZ;
+
+  uint8_t icfer = R_IIC1->ICFER;
+  uint8_t icmr1 = R_IIC1->ICMR1;
+  uint8_t icmr3 = R_IIC1->ICMR3;
+  uint8_t brl = R_IIC1->ICBRL & 0x1F;
+  uint8_t brh = R_IIC1->ICBRH & 0x1F;
+
+  bool scle = (icfer >> 6) & 1;
+  bool nfe = (icfer >> 5) & 1;
+  uint8_t cks = (icmr1 >> 4) & 0x07;
+  uint8_t nf = icmr3 & 0x03;
+
+  Serial.println();
+  Serial.println("--- I2C diagnostics ---");
+  Serial.print("Requested clock Hz: "); Serial.println(requested_hz);
+  Serial.print("PCLKB Hz: "); Serial.println(PCLKB_HZ);
+  Serial.print("BSP_FEATURE_SCI_CLOCK Hz: "); Serial.println(SCI_CLOCK_HZ);
+
+  Serial.print("ICFER=0x"); Serial.print(icfer, HEX);
+  Serial.print(" SCLE="); Serial.print(scle);
+  Serial.print(" NFE="); Serial.println(nfe);
+
+  Serial.print("ICMR1=0x"); Serial.print(icmr1, HEX);
+  Serial.print(" CKS="); Serial.print(cks, BIN); Serial.println("b");
+
+  Serial.print("ICMR3=0x"); Serial.print(icmr3, HEX);
+  Serial.print(" NF="); Serial.println(nf);
+
+  Serial.print("ICBRL="); Serial.print(brl);
+  Serial.print(" ICBRH="); Serial.println(brh);
+
+  uint8_t nf_cycles = nfe ? (nf + 1) : 0;
+  uint16_t high_cycles = brh + 3 + nf_cycles;
+  uint16_t low_cycles = brl + 3 + nf_cycles;
+  uint16_t total_cycles = high_cycles + low_cycles;
+  uint32_t iic_clock_hz = IICPHI_HZ >> cks;
+  float high_ns = (1000000000.0f * high_cycles) / iic_clock_hz;
+  float low_ns = (1000000000.0f * low_cycles) / iic_clock_hz;
+  float base_rate_hz = (float) iic_clock_hz / total_cycles;
+
+  Serial.print("Formula case: SCLE=");
+  Serial.print(scle);
+  Serial.print(", NFE=");
+  Serial.print(nfe);
+  Serial.print(", CKS=");
+  Serial.print(cks, BIN); Serial.println("b");
+
+  Serial.print("Estimated high cycles: "); Serial.println(high_cycles);
+  Serial.print("Estimated low cycles: "); Serial.println(low_cycles);
+  Serial.print("Estimated total cycles before tr/tf: "); Serial.println(total_cycles);
+  Serial.print("IICphi Hz used for estimate: "); Serial.println(IICPHI_HZ);
+  Serial.print("IICphi divided by CKS Hz: "); Serial.println(iic_clock_hz);
+  Serial.print("Base high ns before tr: "); Serial.println(high_ns);
+  Serial.print("Base low ns before tf: "); Serial.println(low_ns);
+  Serial.print("Base rate Hz before tr/tf: "); Serial.println(base_rate_hz);
+  Serial.println("Use: rate = 1 / ((total_cycles / IICphi) + tr + tf)");
+  Serial.println("-----------------------");
+}
+
 
 void setup() {
   Serial.begin(9600);
   while (!Serial);
   Wire.begin();
 
+  Wire.setClock(current_i2c_hz);
+  delay(1000);
+
   // Wake up the sensor
   writeRegister(ADDR_MPU6050,REG_PWR_MGMT_1, 0x00);
 }
 
 void loop() {
+
   if (Serial.available()){
     String serial_input = Serial.readStringUntil('\n');
     serial_input.trim();
@@ -79,24 +148,17 @@ void loop() {
       }
     }
     else if (serial_input == "SET_I2C_100K") {
-    Wire.setClock(100000);
-    Serial.println("OK:CLK=100kHz");
-    }
-    else if (serial_input == "SET_I2C_200K") {
-    Wire.setClock(200000);
-    Serial.println("OK:CLK=200kHz");
-    }
-    else if (serial_input == "SET_I2C_300K") {
-    Wire.setClock(300000);
-    Serial.println("OK:CLK=300kHz");
+      current_i2c_hz = 100000;
+      Wire.setClock(current_i2c_hz);
+      Serial.println("OK:CLK=100kHz");
     }
     else if (serial_input == "SET_I2C_400K") {
-    Wire.setClock(400000);
-    Serial.println("OK:CLK=400kHz");
+      current_i2c_hz = 400000;
+      Wire.setClock(current_i2c_hz);
+      Serial.println("OK:CLK=400kHz");
     }
-    else if (serial_input == "SET_I2C_1000K") {
-    Wire.setClock(1000000);
-    Serial.println("OK:CLK=1000kHz");
+    else if (serial_input == "PRINT_I2C_DIAGNOSTICS") {
+      printI2CDiagnostics(current_i2c_hz);
     }
     else{
       Serial.println("ERR:UNKNOWN_CMD");
@@ -126,7 +188,7 @@ Result8 readRegister8(uint8_t device_addr, uint8_t reg) {
 }
 
 
-
+// Reads 16-bit register from starting with first 8 bit register
 Result16 readRegister16(uint8_t device_addr, uint8_t reg){
   Result16 default_value = {false, 0};  // start with failed case
 
@@ -181,7 +243,3 @@ void writeRegister(uint8_t device_addr, uint8_t reg, uint8_t val) {
   Wire.write(val);
   Wire.endTransmission();
 }
-
-
-
-

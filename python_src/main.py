@@ -1,5 +1,6 @@
 from serial_comm import serial_setup, send_command
 from analyzer import evaluate_result, analyze_i2c
+from config import BAUD_RATE, I2C_100KHZ_CSV, I2C_400KHZ_CSV, SERIAL_PORT
 import time
 
 def run_test(ser, cmd) -> str:
@@ -39,10 +40,10 @@ def run_i2c_analysis() -> None:
     print("\nRunning I2C Timing Analysis...\n")
 
     print("[100 kHz Test]")
-    analyze_i2c('data/i2c_data_100khz.csv')
+    analyze_i2c(I2C_100KHZ_CSV)
 
     print("\n[400 kHz Test]")
-    analyze_i2c('data/i2c_data_400khz.csv')
+    analyze_i2c(I2C_400KHZ_CSV)
 
     print("\n----------------------------------")
 
@@ -88,7 +89,7 @@ def run_i2c_diagnostics(ser) -> None:
 
 def main():
 
-    ser = serial_setup("COM3", 9600)
+    ser = serial_setup(SERIAL_PORT, BAUD_RATE)
     # Clear any startup diagnostics printed by the Arduino after reset.
     ser.reset_input_buffer()
     run_validation_suite(ser)

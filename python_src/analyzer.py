@@ -1,9 +1,6 @@
 import pandas as pd
 import os
-
-
-EXPECTED_WHO_AM_I = '104'  # 0x68 for MPU6050
-MIN_Z_GRAVITY_LSB = 14000  # About 0.85g at default +/-2g scale
+from config import EXPECTED_WHO_AM_I, MIN_Z_GRAVITY_LSB
 
 def evaluate_result(response: list[str]) -> str:
     status, test = response[0:2]

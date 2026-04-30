@@ -3,6 +3,7 @@ import csv
 import os
 from serial_comm import send_command
 from analyzer import evaluate_result
+from config import DATA_DIR_NAME
 from datetime import datetime
 
 
@@ -18,7 +19,7 @@ def get_precise_time() -> str:
 
 def send_command_csv(ser, cmd: str) -> None:
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    DATA_DIR = os.path.join(BASE_DIR, "data")
+    DATA_DIR = os.path.join(BASE_DIR, DATA_DIR_NAME)
     os.makedirs(DATA_DIR, exist_ok=True)
 
     precise_time: str = get_precise_time()

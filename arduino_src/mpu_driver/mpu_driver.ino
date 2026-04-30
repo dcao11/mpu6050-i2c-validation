@@ -198,7 +198,7 @@ Result16 readRegister16(uint8_t device_addr, uint8_t reg){
     return default_value;
   }
 
-  if (Wire.requestFrom(device_addr, 2) != 2) {  // expect 1 byte
+  if (Wire.requestFrom(device_addr, 2) != 2) {  // expect 2 byte
     return default_value;
   }
 

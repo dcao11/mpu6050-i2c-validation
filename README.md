@@ -61,12 +61,12 @@ MPU6050 Sensor
 ## Hardware Setup
 
 - MPU6050 connected via I2C:
-  - VCC -> 5V
+  - VCC -> 3.3V
   - GND -> GND
   - SDA -> SDA (Freenove control board)
   - SCL -> SCL (Freenove control board)
 
-- Pull-up resistors (~5 kohm) used on SDA and SCL
+- Pull-up resistors (~5 kohm) used on SDA and SCL to 3.3V
 ------------------------------------------------------------------------
 ## I2C Timing Validation
 

@@ -2,6 +2,9 @@ import pandas as pd
 import os
 
 
+EXPECTED_WHO_AM_I = '104'  # 0x68 for MPU6050
+MIN_Z_GRAVITY_LSB = 14000  # About 0.85g at default +/-2g scale
+
 def evaluate_result(response: list[str]) -> str:
     status, test = response[0:2]
 
@@ -9,11 +12,11 @@ def evaluate_result(response: list[str]) -> str:
         return "FAIL"
 
     if test == "WHO_AM_I":
-        return "PASS" if response[2] == "104" else "FAIL"
+        return "PASS" if response[2] == EXPECTED_WHO_AM_I else "FAIL"
 
     if test == "ACCEL":
         z = int(response[4])
-        return "PASS" if abs(z) > 14000 else "FAIL"
+        return "PASS" if abs(z) > MIN_Z_GRAVITY_LSB else "FAIL"
 
     return "FAIL"
 

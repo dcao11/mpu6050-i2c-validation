@@ -109,8 +109,12 @@ With SCLE = 1, NFE = 1, and NF = 0:
 
 ```text
 nf = NF + 1 = 1
-high_cycles = ICBRH + 3 + nf
-low_cycles  = ICBRL + 3 + nf
+if CKS == 000b:
+  high_cycles = ICBRH + 3 + nf
+  low_cycles  = ICBRL + 3 + nf
+else:
+  high_cycles = ICBRH + 2 + nf
+  low_cycles  = ICBRL + 2 + nf
 iic_clock   = PCLKB / 2^CKS
 rate        = 1 / ((high_cycles + low_cycles) / iic_clock + tr + tf)
 ```
@@ -131,12 +135,14 @@ Calculation:
 
 ```text
 iic_clock = 24 MHz / 2^2 = 6 MHz
-high_cycles = 26 + 3 + 1 = 30
-low_cycles  = 27 + 3 + 1 = 31
-total_cycles = 61
+CKS = 010b, so this uses the CKS != 000b case:
 
-ideal period = 61 / 6 MHz = 10.17 us
-ideal frequency = 98.4 kHz before tr/tf
+high_cycles = 26 + 2 + 1 = 29
+low_cycles  = 27 + 2 + 1 = 30
+total_cycles = 59
+
+ideal period = 59 / 6 MHz = 9.83 us
+ideal frequency = 101.7 kHz before tr/tf
 ```
 
 This is close to the measured result of approximately 100 kHz.
@@ -155,6 +161,8 @@ Calculation:
 
 ```text
 iic_clock = 24 MHz / 2^0 = 24 MHz
+CKS = 000b, so this uses the CKS == 000b case:
+
 high_cycles = 15 + 3 + 1 = 19
 low_cycles  = 16 + 3 + 1 = 20
 total_cycles = 39
@@ -318,14 +326,14 @@ ICMR1=0x28 CKS=10b
 ICMR3=0x0 NF=0
 ICBRL=27 ICBRH=26
 Formula case: SCLE=1, NFE=1, CKS=10b
-Estimated high cycles: 30
-Estimated low cycles: 31
-Estimated total cycles before tr/tf: 61
+Estimated high cycles: 29
+Estimated low cycles: 30
+Estimated total cycles before tr/tf: 59
 IICphi Hz used for estimate: 24000000
 IICphi divided by CKS Hz: 6000000
-Base high ns before tr: 5000.00
-Base low ns before tf: 5166.67
-Base rate Hz before tr/tf: 98360.66
+Base high ns before tr: 4833.33
+Base low ns before tf: 5000.00
+Base rate Hz before tr/tf: 101694.91
 Use: rate = 1 / ((total_cycles / IICphi) + tr + tf)
 -----------------------
 

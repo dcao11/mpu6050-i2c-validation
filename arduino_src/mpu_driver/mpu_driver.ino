@@ -99,10 +99,11 @@ void setup() {
   Wire.begin();
 
   Wire.setClock(current_i2c_hz);
-  delay(1000);
+  delay(100);
 
   // Wake up the sensor
-  writeRegister(ADDR_MPU6050,REG_PWR_MGMT_1, 0x00);
+  writeRegister(ADDR_MPU6050, REG_PWR_MGMT_1, 0x00);
+  delay(100);
 }
 
 void loop() {
@@ -113,11 +114,11 @@ void loop() {
     if (serial_input =="READ_WHOAMI"){
       Result8 RES_WHO_AM_I = readRegister8(ADDR_MPU6050,REG_WHO_AM_I);
       if (RES_WHO_AM_I.success){
-        Serial.print("OK:WHO_AM_I:");
+        Serial.print("OK:READ_WHOAMI:WHO_AM_I:");
         Serial.println(RES_WHO_AM_I.value);
       }
       else{
-        Serial.println("ERR:MPU_NOT_DETECTED");
+        Serial.println("ERR:READ_WHOAMI:MPU_NOT_DETECTED");
       }
     }
     else if(serial_input =="READ_ACCEL"){
@@ -126,7 +127,7 @@ void loop() {
         int16_t RES_ACCEL_XOUT = (RES_ACCEL.data[0] << 8) | RES_ACCEL.data[1];
         int16_t RES_ACCEL_YOUT = (RES_ACCEL.data[2] << 8) | RES_ACCEL.data[3];
         int16_t RES_ACCEL_ZOUT = (RES_ACCEL.data[4] << 8) | RES_ACCEL.data[5];
-        Serial.print("OK:ACCEL:"); 
+        Serial.print("OK:READ_ACCEL:ACCEL:"); 
         Serial.print(RES_ACCEL_XOUT);
         Serial.print(":"); 
         Serial.print(RES_ACCEL_YOUT);
@@ -134,34 +135,35 @@ void loop() {
         Serial.println(RES_ACCEL_ZOUT);
       }
       else{
-        Serial.println("ERR:FAILED_READ_ACCEL");
+        Serial.println("ERR:READ_ACCEL:FAILED_READ_ACCEL");
       }
     }
     else if (serial_input =="READ_WHOAMI_BAD_ADDR"){
-      Result8 RES_WHO_AM_I = readRegister8(ADDR_MPU6050 + 1,REG_WHO_AM_I);
+      Result8 RES_WHO_AM_I = readRegister8(ADDR_MPU6050 + 1, REG_WHO_AM_I);
       if (RES_WHO_AM_I.success){
-        Serial.print("OK:WHO_AM_I:");
+        Serial.print("OK:READ_WHOAMI_BAD_ADDR:WHO_AM_I:");
         Serial.println(RES_WHO_AM_I.value);
       }
       else{
-        Serial.println("ERR:MPU_NOT_DETECTED");
+        Serial.println("ERR:READ_WHOAMI_BAD_ADDR:MPU_NOT_DETECTED");
       }
     }
     else if (serial_input == "SET_I2C_100K") {
       current_i2c_hz = 100000;
       Wire.setClock(current_i2c_hz);
-      Serial.println("OK:CLK=100kHz");
+      Serial.println("OK:SET_I2C_100K:CLK=100kHz");
     }
     else if (serial_input == "SET_I2C_400K") {
       current_i2c_hz = 400000;
       Wire.setClock(current_i2c_hz);
-      Serial.println("OK:CLK=400kHz");
+      Serial.println("OK:SET_I2C_400K:CLK=400kHz");
     }
     else if (serial_input == "PRINT_I2C_DIAGNOSTICS") {
       printI2CDiagnostics(current_i2c_hz);
     }
     else{
-      Serial.println("ERR:UNKNOWN_CMD");
+      Serial.print("ERR:UNKNOWN_CMD:");
+      Serial.println(serial_input);
     }
   }
 }
@@ -198,7 +200,7 @@ Result16 readRegister16(uint8_t device_addr, uint8_t reg){
     return default_value;
   }
 
-  if (Wire.requestFrom(device_addr, 2) != 2) {  // expect 2 byte
+  if (Wire.requestFrom(device_addr, 2) != 2) {  // expect 2 bytess
     return default_value;
   }
 

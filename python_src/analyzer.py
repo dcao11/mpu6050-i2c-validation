@@ -2,17 +2,29 @@ import pandas as pd
 import os
 from config import EXPECTED_WHO_AM_I, MIN_Z_GRAVITY_LSB
 
+
 def evaluate_result(response: list[str]) -> str:
-    status, test = response[0:2]
+    if len(response) < 2:
+        return "FAIL"
+
+    status = response[0]
+    command = response[1]
+
+    if command == "READ_WHOAMI_BAD_ADDR":
+        return "PASS" if response == ["ERR", "READ_WHOAMI_BAD_ADDR", "MPU_NOT_DETECTED"] else "FAIL"
 
     if status == "ERR":
         return "FAIL"
 
-    if test == "WHO_AM_I":
-        return "PASS" if response[2] == EXPECTED_WHO_AM_I else "FAIL"
+    if command == "READ_WHOAMI":
+        if len(response) < 4:
+            return "FAIL"
+        return "PASS" if response[2] == "WHO_AM_I" and response[3] == EXPECTED_WHO_AM_I else "FAIL"
 
-    if test == "ACCEL":
-        z = int(response[4])
+    if command == "READ_ACCEL":
+        if len(response) < 6 or response[2] != "ACCEL":
+            return "FAIL"
+        z = int(response[5])
         return "PASS" if abs(z) > MIN_Z_GRAVITY_LSB else "FAIL"
 
     return "FAIL"
@@ -63,4 +75,3 @@ def analyze_i2c(file_path: str) -> None:
     print(f"Min Frequency:   {freq_khz.min():.2f} kHz")
     print(f"Max Frequency:   {freq_khz.max():.2f} kHz")
     print(f"Total Pulses:    {len(freq_khz)}")
-

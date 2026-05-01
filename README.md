@@ -60,9 +60,9 @@ MPU6050 Sensor
 
 ## Hardware Setup
 
-- MPU6050 connected via I2C:
-  - VCC -> 3.3V
-  - GND -> GND
+- MPU6050 connected to the Freenove Control Board V5 Rev4 Mini:
+  - VCC -> 3.3V (Freenove control board)
+  - GND -> GND (Freenove control board)
   - SDA -> SDA (Freenove control board)
   - SCL -> SCL (Freenove control board)
 
@@ -193,7 +193,7 @@ project_root/
 |   |-- analyzer.py      # PASS/FAIL logic + analysis
 |   `-- config.py        # Configuration (paths, constants)
 |
-|-- data/                # Generated CSV logs and PulseView CSV files
+|-- data/                # Sample timing CSVs and generated validation logs
 |
 |-- arduino_src/         # Arduino IDE-compatible firmware (DUT)
 |   `-- mpu_driver/      # Arduino sketch source
@@ -222,27 +222,27 @@ project_root/
 ## Example Output (Serial)
 
 ```text
-OK:WHO_AM_I:104
-OK:ACCEL:-1240:-48:15344
-ERR:MPU_NOT_DETECTED
+OK:READ_WHOAMI:WHO_AM_I:104
+OK:READ_ACCEL:ACCEL:-1240:-48:15344
+ERR:READ_WHOAMI_BAD_ADDR:MPU_NOT_DETECTED
 ```
 
 ------------------------------------------------------------------------
 
 ## CSV Logging
 
-Format: timestamp, result, command, status, test, x, y, z, raw
+Format: timestamp, result, command, status, device_command, test, x, y, z, raw
 
 Example: 
 
 ['2026-04-04 17:39:40.805', 'PASS', 'READ_WHOAMI', 'OK',
-'WHO_AM_I', '104', 'OK:WHO_AM_I:104']
+'READ_WHOAMI', 'WHO_AM_I', '104', 'OK:READ_WHOAMI:WHO_AM_I:104']
 
-['2026-04-04 17:39:40.914', 'PASS', 'READ_ACCEL', 'OK', 'ACCEL',
-'-928', '-176', '15168', 'OK:ACCEL:-928:-176:15168']
+['2026-04-04 17:39:40.914', 'PASS', 'READ_ACCEL', 'OK', 'READ_ACCEL', 'ACCEL',
+'-928', '-176', '15168', 'OK:READ_ACCEL:ACCEL:-928:-176:15168']
 
-['2026-04-04 17:39:41.023', 'FAIL', 'READ_WHOAMI_BAD_ADDR', 'ERR',
-'MPU_NOT_DETECTED', 'ERR:MPU_NOT_DETECTED']
+['2026-04-04 17:39:41.023', 'PASS', 'READ_WHOAMI_BAD_ADDR', 'ERR',
+'READ_WHOAMI_BAD_ADDR', 'MPU_NOT_DETECTED', 'ERR:READ_WHOAMI_BAD_ADDR:MPU_NOT_DETECTED']
 
 ------------------------------------------------------------------------
 
@@ -268,47 +268,47 @@ Example:
 
 ```text
 [TEST] READ_WHOAMI
-Response: OK:WHO_AM_I:104
+Response: OK:READ_WHOAMI:WHO_AM_I:104
 Result: PASS
 
 [TEST] READ_ACCEL
-Response: OK:ACCEL:-1240:-48:15344
+Response: OK:READ_ACCEL:ACCEL:-1260:-208:15216
 Result: PASS
 
 [TEST] READ_WHOAMI_BAD_ADDR
-Response: ERR:MPU_NOT_DETECTED
-Result: FAIL
+Response: ERR:READ_WHOAMI_BAD_ADDR:MPU_NOT_DETECTED
+Result: PASS
 
 ----------------------------------
-PASS: 2
-FAIL: 1
+PASS: 3
+FAIL: 0
 
 ----------------------------------
 
-Running I2C Timing Analysis...
+Running I2C Timing Analysis on saved CSV files...
 
 [100 kHz Test]
 --- I2C Hardware Validation ---
 File:            i2c_data_100khz.csv
-Detected Unit:   Microseconds
-Mean Frequency:  99.29 kHz
-Min Frequency:   41.67 kHz
-Max Frequency:   100.00 kHz
-Total Pulses:    738
+Detected Unit:   Nanoseconds
+Mean Frequency:  99.37 kHz
+Min Frequency:   43.48 kHz
+Max Frequency:   100.85 kHz
+Total Pulses:    82
 
 [400 kHz Test]
 --- I2C Hardware Validation ---
 File:            i2c_data_400khz.csv
 Detected Unit:   Nanoseconds
-Mean Frequency:  518.91 kHz
-Min Frequency:   56.87 kHz
+Mean Frequency:  519.01 kHz
+Min Frequency:   67.04 kHz
 Max Frequency:   545.55 kHz
-Total Pulses:    3116
+Total Pulses:    82
 
 ----------------------------------
 
 [DIAGNOSTIC] 100 kHz
-OK:CLK=100kHz
+OK:SET_I2C_100K:CLK=100kHz
 --- I2C diagnostics ---
 Requested clock Hz: 100000
 PCLKB Hz: 24000000
@@ -330,7 +330,7 @@ Use: rate = 1 / ((total_cycles / IICphi) + tr + tf)
 -----------------------
 
 [DIAGNOSTIC] 400 kHz
-OK:CLK=400kHz
+OK:SET_I2C_400K:CLK=400kHz
 --- I2C diagnostics ---
 Requested clock Hz: 400000
 PCLKB Hz: 24000000
@@ -349,12 +349,8 @@ Base high ns before tr: 791.67
 Base low ns before tf: 833.33
 Base rate Hz before tr/tf: 615384.63
 Use: rate = 1 / ((total_cycles / IICphi) + tr + tf)
------------------------
 ```
 
-### CSV Output
-#### test_READ_ACCEL.csv
-![CSV Output](assets/csv_output.png)
 
 ### I2C Waveform (PulseView)
 #### Accelerometer burst read, `Wire.setClock(400000)` configured, measured above 400 kHz
@@ -388,3 +384,9 @@ This project demonstrates practical validation engineering through real hardware
 - [Renesas FSP - IIC Master Driver Documentation](https://renesas.github.io/fsp/group___i_i_c___m_a_s_t_e_r.html)
 - [MPU-6050 Register Map and Descriptions](https://cdn.sparkfun.com/datasheets/Sensors/Accelerometers/RM-MPU-6000A.pdf)
 - [MPU-6050 Datasheet (Product Specification)](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/imu/data_sheet/mpu-6000-datasheet1.pdf)
+
+------------------------------------------------------------------------
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
